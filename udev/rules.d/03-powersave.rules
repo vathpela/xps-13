@@ -1,0 +1,20 @@
+IMPORT{builtin}="usb_id"
+
+# disable bluetooth
+SUBSYSTEM=="rfkill", ATTR{type}=="bluetooth", ATTR{state}="1"
+
+# powersave all wifi
+ACTION=="add", SUBSYSTEM=="net", KERNEL=="wlan*", RUN+="/usr/bin/iw dev %k set power_save on"
+
+# pci pm auto
+ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"
+
+# non-hid usb devices
+ENV{DRIVER}=="usbhid", GOTO="usbhid_end"
+ENV{ID_MODEL}=="USB_Keyboard", GOTO="usbhid_end"
+ENV{ID_MODEL}=="USB_Receiver", GOTO="usbhid_end"
+ACTION=="add", SUBSYSTEM=="usb", TEST=="power/control", ATTR{power/control}="auto"
+LABEL="usbhid_end"
+
+# scsi devices
+ACTION=="add", SUBSYSTEM=="scsi_host", KERNEL=="host*", ATTR{link_power_management_policy}="min_power"
